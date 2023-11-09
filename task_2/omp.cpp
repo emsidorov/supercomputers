@@ -28,9 +28,16 @@ public:
     }
 
     double get_diff(int i, int j, int k) {
-        double diff_x = (this->get(i - 1, j, k) - 2 * this->get(i, j, k) + this->get(i + 1, j, k)) / (dx * dx);
-        double diff_y = (this->get(i, j - 1, k) - 2 * this->get(i, j, k) + this->get(i, j + 1, k)) / (dy * dy);
-        double diff_z = (this->get(i, j, k - 1) - 2 * this->get(i, j, k) + this->get(i, j, k + 1)) / (dz * dz);
+        double diff_x, diff_y, diff_z;
+        if (i == 0 || i == Nx - 1) {
+            diff_x = (this->get(Nx - 2, j, k) - 2 * this->get(Nx - 1, j, k) + this->get(1, j, k)) / (dx * dx);
+            diff_y = (this->get(Nx - 1, j - 1, k) - 2 * this->get(Nx - 1, j, k) + this->get(Nx - 1, j + 1, k)) / (dy * dy);
+            diff_z = (this->get(Nx - 1, j, k - 1) - 2 * this->get(Nx - 1, j, k) + this->get(Nx - 1, j, k + 1)) / (dz * dz);
+        } else {
+            diff_x = (this->get(i - 1, j, k) - 2 * this->get(i, j, k) + this->get(i + 1, j, k)) / (dx * dx);
+            diff_y = (this->get(i, j - 1, k) - 2 * this->get(i, j, k) + this->get(i, j + 1, k)) / (dy * dy);
+            diff_z = (this->get(i, j, k - 1) - 2 * this->get(i, j, k) + this->get(i, j, k + 1)) / (dz * dz);
+        }
         return diff_x + diff_y + diff_z;
     }
 
@@ -92,14 +99,6 @@ public:
                     grid.set(i, j, k, u(x, y, z, t));
                 }
             }
-        }
-    }
-
-    void set_border(Grid& grid, int i, int j, int k, double t) {
-        if (j == 0 && k == 0) {
-            grid.set(i, j, k, 0);
-        } else {
-            grid.set(i, j, k, this->u_from_idx(i, j, k, t));
         }
     }
 
@@ -184,14 +183,13 @@ int main(int argc, char *argv[]) {
     for (double t = 2; t <= time_grid_size; ++t) {
         max_err = 0;
         #pragma omp parallel for reduction(max:max_err)
-        for (i = 1; i < grid_size; ++i) {
-            for (j = 1; j < grid_size; ++j) {
-                for (k = 1; k < grid_size; ++k) {
+        for (int i = 0; i <= grid_size; ++i) {
+            for (int j = 1; j < grid_size; ++j) {
+                for (int k = 1; k < grid_size; ++k) {
                     value_1 = (dt * dt) / (2 * M_PI * M_PI) * grid_prev.get_diff(i, j, k);
                     value_2 = 2 * grid_prev.get(i, j, k) - grid.get(i, j, k);
                     new_value = value_1 + value_2;
                     grid.set(i, j, k, new_value);
-
                     cur_err = std::fabs(function.u_from_idx(i, j, k, t * dt) - new_value);
                     max_err = std::max(cur_err, max_err);
                 }

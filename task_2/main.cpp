@@ -2,6 +2,9 @@
 #include <cstdlib> // Для использования функции atof и atoi
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <stdexcept>
+#include <sstream>
 
 
 class Grid {
@@ -61,6 +64,24 @@ public:
             }
         }
         std::cout << "---------Grid Finish----------\n";
+    }
+
+    void save(const std::string& filename) {
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            throw std::runtime_error("Unable to open file for writing.");
+        }
+
+        file << "Nx: " << Nx << " Ny: " << Ny << " Nz: " << Nz << "\n";
+        for (int i = 0; i < Nx; ++i) {
+            for (int j = 0; j < Ny; ++j) {
+                for (int k = 0; k < Nz; ++k) {
+                    file << this->get(i, j, k) << ",";
+                }
+            }
+        }
+
+        file.close();
     }
 
 private:
@@ -144,8 +165,8 @@ double compute_error(const Grid& grid1, const Grid& grid2) {
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 7) {
-        std::cerr << "Usage: " << argv[0] << " Lx Ly Lz grid_size T time_size" << std::endl;
+    if (argc != 8) {
+        std::cerr << "Usage: " << argv[0] << " Lx Ly Lz grid_size T time_size save_mode" << std::endl;
         return 1;
     }
 
@@ -155,6 +176,7 @@ int main(int argc, char *argv[]) {
     int grid_size = atoi(argv[4]);
     double T = atof(argv[5]);
     int time_grid_size = atoi(argv[6]);
+    bool save = atoi(argv[7]);
 
     double dx = Lx / grid_size;
     double dy = Ly / grid_size;
@@ -173,6 +195,10 @@ int main(int argc, char *argv[]) {
     int i, j, k;
     double new_value, value_1, value_2, cur_err;
 
+    if (save){
+        grid.save("matrix/0.txt");
+    }
+
     for (i = 1; i < grid_size; ++i) {
         for (j = 1; j < grid_size; ++j) {
             for (k = 1; k < grid_size; ++k) {
@@ -184,6 +210,10 @@ int main(int argc, char *argv[]) {
         }
     }
     std::cout << "Error at time " << dt << " : " << max_err << std::endl;
+
+    if (save){
+        grid_prev.save("matrix/1.txt");
+    }
 
     for (double t = 2; t <= 20; ++t) {
         max_err = 0;
@@ -199,6 +229,12 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
+        if (save){
+            std::ostringstream filename;
+            filename << "matrix/" << t << ".txt";
+            grid.save(filename.str());
+        }
+
         grid_prev.swap(grid);
         std::cout << "Error at time " << t * dt << " : " << max_err << std::endl;
     }

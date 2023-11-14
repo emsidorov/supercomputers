@@ -16,3 +16,17 @@
     - ```analytical.mp4``` - видео с аналитической сеткой
     - ```computed.mp4``` - видео с посчитанной сеткой
     - ```error.mp4``` - видео с сеткой ошибок, ошибка считалас, как abs(computed_matrix - analytical_matrix)
+
+
+**Запуск решения**
+
+```bash
+./main Lx Ly Lz N T K save_mode
+```
+- Lx Ly Lz N T K - параметры сетки
+- save_mode - flag, который отвечает за сохранение рассчитанной матрицы или нет
+
+```bash
+./omp Lx Ly Lz N T K
+```
+- Lx Ly Lz N T K - параметры сетки

@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
         grid_prev.save("matrix/1.txt");
     }
 
-    for (double t = 2; t <= 20; ++t) {
+    for (double t = 2; t <= time_grid_size; ++t) {
         max_err = 0;
         for (int i = 0; i <= grid_size; ++i) {
             for (int j = 1; j < grid_size; ++j) {

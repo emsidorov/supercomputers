@@ -67,7 +67,7 @@ public:
     }
 
     void save(const std::string& filename) {
-        std::ofstream file(filename);
+        std::ofstream file(filename.c_str());
         if (!file.is_open()) {
             throw std::runtime_error("Unable to open file for writing.");
         }

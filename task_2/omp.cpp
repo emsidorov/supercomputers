@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <stdexcept>
+#include <sstream>
 #include <omp.h>
 
 
@@ -59,6 +62,24 @@ public:
             }
         }
         std::cout << "---------Grid Finish----------\n";
+    }
+
+    void save(const std::string& filename) {
+        std::ofstream file(filename.c_str());
+        if (!file.is_open()) {
+            throw std::runtime_error("Unable to open file for writing.");
+        }
+
+        file << "Nx: " << Nx << " Ny: " << Ny << " Nz: " << Nz << "\n";
+        for (int i = 0; i < Nx; ++i) {
+            for (int j = 0; j < Ny; ++j) {
+                for (int k = 0; k < Nz; ++k) {
+                    file << this->get(i, j, k) << ",";
+                }
+            }
+        }
+
+        file.close();
     }
 
 private:
@@ -132,8 +153,8 @@ double compute_error(const Grid& grid1, const Grid& grid2) {
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 7) {
-        std::cerr << "Usage: " << argv[0] << " Lx Ly Lz grid_size" << std::endl;
+    if (argc != 8) {
+        std::cerr << "Usage: " << argv[0] << " Lx Ly Lz grid_size T time_size save_mode" << std::endl;
         return 1;
     }
 
@@ -143,6 +164,7 @@ int main(int argc, char *argv[]) {
     int grid_size = atoi(argv[4]);
     double T = atof(argv[5]);
     int time_grid_size = atoi(argv[6]);
+    bool save = atoi(argv[7]);
 
     double dx = Lx / grid_size;
     double dy = Ly / grid_size;
@@ -158,6 +180,10 @@ int main(int argc, char *argv[]) {
 
     function.fill_grid(grid, 0);
     function.fill_grid(grid_prev, dt);
+
+    if (save){
+        grid.save("matrix/0.txt");
+    }
 
     double start = omp_get_wtime();
 
@@ -180,6 +206,10 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Error at time " << dt << " : " << max_err << std::endl;
 
+    if (save){
+        grid_prev.save("matrix/1.txt");
+    }
+
     for (double t = 2; t <= time_grid_size; ++t) {
         max_err = 0;
         #pragma omp parallel for reduction(max:max_err)
@@ -194,6 +224,11 @@ int main(int argc, char *argv[]) {
                     max_err = std::max(cur_err, max_err);
                 }
             }
+        }
+        if (save){
+            std::ostringstream filename;
+            filename << "matrix/" << t << ".txt";
+            grid.save(filename.str());
         }
         grid_prev.swap(grid);
         std::cout << "Error at time " << t * dt << " : " << max_err << std::endl;

@@ -22,11 +22,7 @@
 
 ```bash
 ./main Lx Ly Lz N T K save_mode
+./omp Lx Ly Lz N T K save_mode
 ```
 - Lx Ly Lz N T K - параметры сетки
 - save_mode - flag, который отвечает за сохранение рассчитанной матрицы или нет
-
-```bash
-./omp Lx Ly Lz N T K
-```
-- Lx Ly Lz N T K - параметры сетки

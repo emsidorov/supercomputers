@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
     for (i = 1; i < grid_size; ++i) {
         for (j = 1; j < grid_size; ++j) {
             for (k = 1; k < grid_size; ++k) {
-                new_value = grid.get(i, j, k) + (dt * dt) / (4 * M_PI * M_PI) * grid.get_diff(i, j, k);
+                new_value = grid.get(i, j, k) + (dt * dt) / (8 * M_PI * M_PI) * grid.get_diff(i, j, k);
                 grid_prev.set(i, j, k, new_value);
 
                 cur_err = std::fabs(function.u_from_idx(i, j, k, dt) - new_value);
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i <= grid_size; ++i) {
             for (int j = 1; j < grid_size; ++j) {
                 for (int k = 1; k < grid_size; ++k) {
-                    value_1 = (dt * dt) / (2 * M_PI * M_PI) * grid_prev.get_diff(i, j, k);
+                    value_1 = (dt * dt) / (4 * M_PI * M_PI) * grid_prev.get_diff(i, j, k);
                     value_2 = 2 * grid_prev.get(i, j, k) - grid.get(i, j, k);
                     new_value = value_1 + value_2;
                     grid.set(i, j, k, new_value);

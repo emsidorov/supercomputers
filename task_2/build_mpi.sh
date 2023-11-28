@@ -1,0 +1,1 @@
+mpixlC -o mpi mpi.cpp -qsmp=omp

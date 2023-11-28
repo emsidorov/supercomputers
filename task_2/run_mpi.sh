@@ -1,0 +1,1 @@
+mpisubmit.pl -p 4 -t 4 --stdout results_mpi/res.out --stderr tmp.err mpi -- 1.0 1.0 1.0 256 0.4 20 0
